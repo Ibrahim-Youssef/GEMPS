@@ -11,7 +11,7 @@ Survival_Analysis_GEMPS <- function(
   Cens,      # a vector of length M for the censoring data
   Clinical,  # a matrix of M patients x L clinical features
   Variant,   # a matrix of M patients x V variant features
-  HR.o,      # value of the HR.o parameter in Equation (1) in the paper
+  HR.o=0.5,  # value of the HR.o parameter in Equation (1) in the paper
   q=0.05     # the FDR threshold. Default is 0.05
   )
 
@@ -31,6 +31,7 @@ Survival_Analysis_GEMPS <- function(
   {
     GE <- GE[,-Out]
   }
+  GE.original.ind <- setdiff(c(1:ncol(GE)), Out)
   
   Out <- c()
   for(i in 1 : ncol(Variant))
@@ -102,10 +103,11 @@ Survival_Analysis_GEMPS <- function(
     GE.train.GEMPS <- as.matrix(GE.train[,genes.ind.GEMPS])
     GE.test.GEMPS <- as.matrix(GE.test[,genes.ind.GEMPS])
     cindex.GEMPS <- try(Predict(GE.train.GEMPS, GE.test.GEMPS, Surv.train, Surv.test, Cens.train, Cens.test)$c.index)
+    genes.ind.GEMPS.original <- GE.original.ind[genes.ind.GEMPS]
     
     if(class(cindex.GEMPS) != "try-error")
     {
-      out.GEMPS <- c(list(cindex.GEMPS), list(genes.ind.GEMPS))
+      out.GEMPS <- c(list(cindex.GEMPS), list(genes.ind.GEMPS.original))
     }      
   }
   return(out.GEMPS)
