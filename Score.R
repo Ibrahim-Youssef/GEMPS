@@ -16,6 +16,8 @@ Score <- function(Cox.Uni.beta, Cox.Uni.p, Spearman.beta, Spearman.p, Genes.Sig,
                       # entries of Ind.list equals the number of variants with significant S_n as in Equation (2)
   j <- 1
   
+  Perm.Num <- 10000   # Number of permutation iterations
+  
   for (i in 1 : length(zq))
   {
     ind <- which(q.in[,zq[i]])                          # indices of the associated GE features per variant
@@ -40,8 +42,8 @@ Score <- function(Cox.Uni.beta, Cox.Uni.p, Spearman.beta, Spearman.p, Genes.Sig,
       S.Obs[j] <- S
       
       # Permutation test to construct S.Null and estimate P-value
-      S.Null <- matrix(0, 1000, 1)
-      for (k in 1 : 1000)
+      S.Null <- matrix(0, Perm.Num, 1)
+      for (k in 1 : Perm.Num)
       {
         HR.ind <- sample(length(ind))    # Randome permutaion to the HR values
         Rho.ind <- sample(length(ind))   # Randome permutaion to the Rho values
@@ -55,7 +57,8 @@ Score <- function(Cox.Uni.beta, Cox.Uni.p, Spearman.beta, Spearman.p, Genes.Sig,
           S.Null[k] <- S.Null[k] / sum(S.g.temp>0)
         }
       }
-      S.pvalue[j] <- sum(S.Null >= S) / 1000
+      S.Null <- rbind(S.Null, S)
+      S.pvalue[j] <- sum(S.Null >= S) / (Perm.Num+1)
       j <- j + 1
     }    
   }
